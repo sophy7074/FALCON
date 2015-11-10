@@ -70,7 +70,6 @@ int compare_seq_coor(const void * a, const void * b) {
 
 kmer_lookup * allocate_kmer_lookup ( seq_coor_t size ) {
     kmer_lookup * kl;
-    seq_coor_t i;
 
     //printf("%lu is allocated for kmer lookup\n", size);
     kl = (kmer_lookup *)  malloc( size * sizeof(kmer_lookup) );
@@ -82,8 +81,8 @@ void init_kmer_lookup ( kmer_lookup * kl,  seq_coor_t size ) {
     seq_coor_t i;
     //printf("%lu is allocated for kmer lookup\n", size);
     for (i=0; i<size; i++) {
-        kl[i].start = LONG_MAX;
-        kl[i].last = LONG_MAX;
+        kl[i].start = INT_MAX;
+        kl[i].last = INT_MAX;
         kl[i].count = 0;
     }
 }
@@ -102,7 +101,7 @@ seq_array allocate_seq(seq_coor_t size) {
 
 void init_seq_array( seq_array sa, seq_coor_t size) {
     seq_coor_t i;
-    for (i=0; i++; i<size) {
+    for (i=0; i<size; i++) {
         sa[i] = 0xff;
     }
 }
@@ -175,7 +174,7 @@ void add_sequence ( seq_coor_t start,
     for (i = 0; i < seq_len - K;  i++) {
         //printf("%lu %lu\n", i, kmer_bv);
         //printf("lk before init: %lu %lu %lu\n", kmer_bv, lk[kmer_bv].start, lk[kmer_bv].last);
-        if (lk[kmer_bv].start == LONG_MAX) {
+        if (lk[kmer_bv].start == INT_MAX) {
             lk[kmer_bv].start = start + i;
             lk[kmer_bv].last = start + i;
             lk[kmer_bv].count += 1;
@@ -197,8 +196,8 @@ void mask_k_mer(seq_coor_t size, kmer_lookup * kl, seq_coor_t threshold) {
     seq_coor_t i;
     for (i=0; i<size; i++) {
         if (kl[i].count > threshold) {
-            kl[i].start = LONG_MAX;
-            kl[i].last = LONG_MAX;
+            kl[i].start = INT_MAX;
+            kl[i].last = INT_MAX;
             //kl[i].count = 0;
         }
     }
@@ -252,7 +251,7 @@ kmer_match * find_kmer_pos_for_seq( char * seq, seq_coor_t seq_len, unsigned int
     half_K = K >> 1;
     for (i = 0; i < seq_len - K;  i += half_K) {
         kmer_bv = get_kmer_bitvector(sa + i, K);
-        if (lk[kmer_bv].start == LONG_MAX) {  //for high count k-mers
+        if (lk[kmer_bv].start == INT_MAX) {  //for high count k-mers
             continue;
         }
         kmer_pos = lk[ kmer_bv ].start;
@@ -310,19 +309,15 @@ aln_range* find_best_aln_range(kmer_match * km_ptr,
     long int max_k_mer_count;
     long int max_k_mer_bin;
     seq_coor_t cur_start;
-    seq_coor_t cur_pos;
-    seq_coor_t max_start;
-    seq_coor_t max_end;
-    seq_coor_t kmer_dist;
 
     arange = calloc(1 , sizeof(aln_range));
 
-    q_min = LONG_MAX;
+    q_min = INT_MAX;
     q_max = 0;
-    t_min = LONG_MAX;
+    t_min = INT_MAX;
     t_max = 0;
 
-    d_min = LONG_MAX;
+    d_min = INT_MAX;
     d_max = LONG_MIN;
 
     for (i = 0; i <  km_ptr->count; i++ ) {
@@ -355,13 +350,13 @@ aln_range* find_best_aln_range(kmer_match * km_ptr,
     for (i = 0; i <  km_ptr->count; i++ ) {
         d = (long int) (km_ptr->query_pos[i]) - (long int) (km_ptr->target_pos[i]);
         d_count[ (d - d_min)/ (long int) bin_size ] += 1;
-        q_coor[i] = LONG_MAX;
-        t_coor[i] = LONG_MAX;
+        q_coor[i] = INT_MAX;
+        t_coor[i] = INT_MAX;
     }
 
     j = 0;
     max_k_mer_count = 0;
-    max_k_mer_bin = LONG_MAX;
+    max_k_mer_bin = INT_MAX;
     for (i = 0; i <  km_ptr->count; i++ ) {
         d = (long int) (km_ptr->query_pos[i]) - (long int) (km_ptr->target_pos[i]);
         if ( d_count[ (d - d_min)/ (long int) bin_size ] > max_k_mer_count) {
@@ -371,7 +366,7 @@ aln_range* find_best_aln_range(kmer_match * km_ptr,
     }
     //printf("k_mer: %lu %lu\n" , max_k_mer_count, max_k_mer_bin);
     
-    if ( max_k_mer_bin != LONG_MAX && max_k_mer_count > count_th ) {
+    if ( max_k_mer_bin != INT_MAX && max_k_mer_count > count_th ) {
         for (i = 0; i <  km_ptr->count; i++ ) {
             d = (long int) (km_ptr->query_pos[i]) - (long int) (km_ptr->target_pos[i]);
             if ( abs( ( (d - d_min)/ (long int) bin_size ) - max_k_mer_bin ) > 5 ) {

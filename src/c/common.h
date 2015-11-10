@@ -54,7 +54,7 @@
  #################################################################################$$
  */
 
-typedef long int seq_coor_t; 
+typedef int seq_coor_t; 
 
 typedef struct {    
     seq_coor_t aln_str_size ;
@@ -122,7 +122,7 @@ typedef struct {
 
 typedef struct {
     char * sequence;
-    unsigned int * eff_cov;
+    int * eqv;
 } consensus_data;
 
 kmer_lookup * allocate_kmer_lookup (seq_coor_t);
@@ -151,6 +151,7 @@ kmer_match * find_kmer_pos_for_seq( char *,
                                     seq_addr_array, 
                                     kmer_lookup * );
 
+void free_kmer_match( kmer_match * ptr);
 void free_kmer_lookup(kmer_lookup * );
 
 
